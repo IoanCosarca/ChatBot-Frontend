@@ -1,0 +1,16 @@
+<div class="chatbot-container">
+  <mat-card class="chatbot-card">
+    <mat-card-title>ChatBot</mat-card-title>
+    <mat-card-content class="query">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Ask your question</mat-label>
+        <input matInput [(ngModel)]="userQuery" placeholder="Type your question here">
+      </mat-form-field>
+      <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()">Submit</button>
+    </mat-card-content>
+    <mat-card-content *ngIf="answer">
+      <h3>Answer:</h3>
+      <p>{{ answer }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
