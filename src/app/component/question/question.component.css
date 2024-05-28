@@ -33,6 +33,11 @@ mat-card-title {
   margin-bottom: 10px;
 }
 
+textarea {
+  min-height: 30px;
+  max-height: 250px;
+}
+
 .submit-button {
   align-self: center;
 }

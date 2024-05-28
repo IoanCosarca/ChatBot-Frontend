@@ -5,6 +5,10 @@ import { MatButton } from "@angular/material/button";
 import { MatCard, MatCardContent, MatCardTitle } from "@angular/material/card";
 import { MatFormField, MatInput, MatLabel }  from "@angular/material/input";
 
+import { AnswerModel } from "../../model/answer.model";
+import { QuestionModel } from "../../model/question.model";
+import { QuestionService } from "../../service/question.service";
+
 @Component({
   selector: 'app-question',
   standalone: true,
@@ -23,17 +27,39 @@ import { MatFormField, MatInput, MatLabel }  from "@angular/material/input";
   styleUrl: './question.component.css'
 })
 export class QuestionComponent {
-  userQuery: string = '';
+  question: QuestionModel = {
+    query: ""
+  };
   answer: string | null = null;
 
+  constructor(private questionService: QuestionService) { }
+
   getAnswer() {
-    // Simulate an answer for now
-    this.answer = `You asked: ${this.userQuery}. (The actual answer would be provided by the RAG model.
-    mmmmmmmmmmmmmmmm mmmmmmmmmmmmmmm mmmmmmmmmmmmmmmm mmmmmmmmm mmmmmmmmmmmmm mmmmmmmmmmmm mmmmmmmmm m
-     mmmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmm mmmmmmmmmmmm mmmmmmmmmmmm m
-      mmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmmm m
-       mmmmmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmmmmm mmmmmmmmmmmmmm mmmmmmmmmmmmmmmmmm m
-        mmmmmmmmmmmmmmmmmmmmmm mmmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmm m
-         mmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmmmmm mmmmmmmmmmmmmmm m)`;
+    this.questionService.askQuestion(this.question).subscribe(
+      (answer: AnswerModel) => {
+        this.answer = answer.query_response;
+      }
+    )
+  }
+
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      if (event.shiftKey) {
+        // Insert a newline character at the cursor position
+        const target = event.target as HTMLTextAreaElement;
+        const value = target.value;
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+
+        target.value = value.substring(0, start) + '\n' + value.substring(end);
+        target.selectionStart = target.selectionEnd = start + 1;
+
+        event.preventDefault();
+      } else {
+        // Call the getAnswer function
+        this.getAnswer();
+        event.preventDefault();
+      }
+    }
   }
 }

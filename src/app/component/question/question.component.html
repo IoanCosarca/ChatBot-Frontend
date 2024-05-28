@@ -4,7 +4,8 @@
     <mat-card-content class="query">
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>Ask your question</mat-label>
-        <input matInput [(ngModel)]="userQuery" placeholder="Type your question here">
+        <textarea matInput [(ngModel)]="question.query" placeholder="Type your question here"
+                  (keydown)="handleKeyDown($event)"></textarea>
       </mat-form-field>
       <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()">Submit</button>
     </mat-card-content>
