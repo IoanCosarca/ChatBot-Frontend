@@ -12,6 +12,10 @@ import { Observable } from "rxjs";
 export class QuestionService {
   constructor(private httpClient: HttpClient) { }
 
+  public getResources(): Observable<string[]> {
+    return this.httpClient.get<string[]>(`http://127.0.0.1:8080/ai`);
+  }
+
   public askQuestion(question: QuestionModel): Observable<AnswerModel> {
     return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai`, question);
   }

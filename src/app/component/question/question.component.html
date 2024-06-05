@@ -4,14 +4,26 @@
     <mat-card-content class="query">
       <mat-form-field class="full-width" appearance="outline">
         <mat-label>Ask your question</mat-label>
-        <textarea matInput [(ngModel)]="question.query" placeholder="Type your question here"
-                  (keydown)="handleKeyDown($event)"></textarea>
+        <textarea matInput #textarea [(ngModel)]="question.query" placeholder="Type your question here"
+                  (keydown)="handleKeyDown($event)" (input)="adjustTextareaHeight()"
+                  [disabled]="inputDisabled"></textarea>
       </mat-form-field>
-      <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()">Submit</button>
+      <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
     </mat-card-content>
-    <mat-card-content *ngIf="answer">
+    <mat-card-content *ngIf="showAnswer">
       <h3>Answer:</h3>
-      <p>{{ answer }}</p>
+      <div *ngIf="isLoading" class="spinner-container">
+        <mat-spinner></mat-spinner>
+      </div>
+      <p *ngIf="!isLoading && answer">{{ displayedAnswer }}</p>
+    </mat-card-content>
+    <mat-card-content *ngIf="showResources">
+      <h3>Resources:</h3>
+      <div @listStagger>
+        <div *ngFor="let resource of resources; let i = index" [style.animation-delay.ms]="i * 100">
+          <mat-card class="resource-card" [innerHTML]="formatResource(resource)"></mat-card>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>
