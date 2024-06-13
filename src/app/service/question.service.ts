@@ -16,7 +16,19 @@ export class QuestionService {
     return this.httpClient.get<string[]>(`http://127.0.0.1:8080/ai`);
   }
 
-  public askQuestion(question: QuestionModel): Observable<AnswerModel> {
-    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai`, question);
+  public askQuestionV1(question: QuestionModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v1`, question);
+  }
+
+  public askQuestionV2(question: QuestionModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v2`, question);
+  }
+
+  public generateQuery(question: QuestionModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/sparql`, question);
+  }
+
+  public askBasedOnGenerated(question: QuestionModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/dbpedia`, question);
   }
 }
