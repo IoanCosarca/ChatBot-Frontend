@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from "@angular/forms";
 import { MatButton } from "@angular/material/button";
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCard, MatCardContent, MatCardTitle } from "@angular/material/card";
 import { MatFormField, MatInput, MatLabel }  from "@angular/material/input";
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,6 +19,7 @@ import { QuestionService } from "../../service/question.service";
     CommonModule,
     FormsModule,
     MatButton,
+    MatButtonToggleModule,
     MatCard,
     MatCardContent,
     MatCardTitle,
@@ -61,6 +63,7 @@ export class QuestionComponent {
   showResources = false;
   inputDisabled = false;
   @ViewChild('textarea') textarea!: ElementRef;
+  selectedVersion = 'version1';
 
   constructor(private questionService: QuestionService) { }
 
@@ -74,10 +77,23 @@ export class QuestionComponent {
     if (this.question.query !== '') {
       this.resetState();
       this.isLoading = true;
-      this.questionService.askQuestion(this.question).subscribe(
-        (answer: AnswerModel) => this.handleResponse(answer),
-        () => this.handleError()
-      );
+
+      if (this.selectedVersion === 'version1') {
+        this.questionService.askQuestionV1(this.question).subscribe(
+          (answer: AnswerModel) => this.handleResponse(answer),
+          () => this.handleError()
+        );
+      } else if (this.selectedVersion === 'version2') {
+        this.questionService.askQuestionV2(this.question).subscribe(
+          (answer: AnswerModel) => this.handleResponse(answer),
+          () => this.handleError()
+        );
+      } else if (this.selectedVersion === 'version3') {
+        this.questionService.generateQuery(this.question).subscribe(
+          (answer: AnswerModel) => this.handleResponse(answer),
+          () => this.handleError()
+        );
+      }
     }
   }
 
@@ -111,7 +127,7 @@ export class QuestionComponent {
           clearInterval(interval);
           resolve();
         }
-      }, 25);
+      }, 15);
     });
   }
 

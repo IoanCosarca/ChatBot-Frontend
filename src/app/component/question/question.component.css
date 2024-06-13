@@ -38,6 +38,21 @@ textarea {
   height: auto;
 }
 
+.button-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.mat-button-toggle {
+  color: #fff;
+}
+
+.mat-button-toggle-checked {
+  background-color: #2196F3;
+  color: #fff;
+}
+
 .submit-button {
   align-self: center;
   font-size: 18px;
