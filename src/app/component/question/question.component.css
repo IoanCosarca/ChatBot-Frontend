@@ -9,7 +9,7 @@
 
 .chatbot-card {
   width: 750px;
-  padding: 20px;
+  padding: 20px 20px 40px 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background-color: #000;
 }
@@ -41,7 +41,7 @@ textarea {
 .button-toggle-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .mat-button-toggle {

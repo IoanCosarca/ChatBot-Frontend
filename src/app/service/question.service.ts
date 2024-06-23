@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { AnswerModel } from "../model/answer.model";
 import { QuestionModel } from "../model/question.model";
+import { SparqlGeneratedModel } from "../model/sparql-generated.model";
 
 import { Observable } from "rxjs";
 
@@ -28,7 +29,7 @@ export class QuestionService {
     return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/sparql`, question);
   }
 
-  public askBasedOnGenerated(question: QuestionModel): Observable<AnswerModel> {
-    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/dbpedia`, question);
+  public askBasedOnGenerated(question_n_sparql: SparqlGeneratedModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/dbpedia`, question_n_sparql);
   }
 }
