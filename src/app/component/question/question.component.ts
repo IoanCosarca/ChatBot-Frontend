@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AnswerModel } from "../../model/answer.model";
 import { QuestionModel } from "../../model/question.model";
+import { SparqlGeneratedModel } from "../../model/sparql-generated.model";
 import { QuestionService } from "../../service/question.service";
 
 @Component({
@@ -64,6 +65,12 @@ export class QuestionComponent {
   inputDisabled = false;
   @ViewChild('textarea') textarea!: ElementRef;
   selectedVersion = 'version1';
+  question_n_sparql: SparqlGeneratedModel = {
+    generated_sparql: "",
+    query: ""
+  };
+  showGeneratedQuery = false;
+  displayedGeneratedQuery = '';
 
   constructor(private questionService: QuestionService) { }
 
@@ -79,18 +86,25 @@ export class QuestionComponent {
       this.isLoading = true;
 
       if (this.selectedVersion === 'version1') {
+        this.showAnswer = true;
         this.questionService.askQuestionV1(this.question).subscribe(
           (answer: AnswerModel) => this.handleResponse(answer),
           () => this.handleError()
         );
-      } else if (this.selectedVersion === 'version2') {
+      }
+      else if (this.selectedVersion === 'version2') {
+        this.showAnswer = true;
         this.questionService.askQuestionV2(this.question).subscribe(
           (answer: AnswerModel) => this.handleResponse(answer),
           () => this.handleError()
         );
-      } else if (this.selectedVersion === 'version3') {
+      }
+      else if (this.selectedVersion === 'version3') {
+        this.showGeneratedQuery = true;
         this.questionService.generateQuery(this.question).subscribe(
-          (answer: AnswerModel) => this.handleResponse(answer),
+          (answer: AnswerModel) => {
+            this.displayGeneratedQuery(answer.query_response);
+          },
           () => this.handleError()
         );
       }
@@ -100,7 +114,7 @@ export class QuestionComponent {
   handleResponse(answer: AnswerModel) {
     this.answer = answer.query_response;
     this.isLoading = false;
-    this.typeAnswer().then(() => {
+    this.typeAnswer(this.answer, "answer").then(() => {
       this.fetchResources();
     });
   }
@@ -109,18 +123,49 @@ export class QuestionComponent {
     this.isLoading = false;
     this.answer = 'An error occurred while fetching the answer.';
     this.displayedAnswer = this.answer;
-    this.typeAnswer().then(() => {
+    this.typeAnswer(this.answer, "answer").then(() => {
       this.enableInput();
     });
   }
 
-  typeAnswer() {
+  displayGeneratedQuery(sparqlQuery: string) {
+    this.displayedGeneratedQuery = '';
+
+    this.typeAnswer(sparqlQuery, "generated query").then(() => {
+      this.handleGeneratedQuery(sparqlQuery);
+    });
+  }
+
+  handleGeneratedQuery(sparqlQuery: string) {
+    this.showAnswer = true;
+    this.question_n_sparql.generated_sparql = sparqlQuery;
+    this.question_n_sparql.query = this.question.query;
+    this.questionService.askBasedOnGenerated(this.question_n_sparql).subscribe(
+      (response: any) => {
+        if (response.status === 200) {
+          this.handleResponse(response.body);
+        }
+        else {
+          this.handleError();
+        }
+      },
+      () => {
+        this.handleError()
+      }
+    );
+  }
+
+  typeAnswer(text: string, section: string): Promise<void> {
     return new Promise<void>((resolve) => {
-      this.displayedAnswer = '';
       let index = 0;
       const interval = setInterval(() => {
-        if (index < this.answer.length) {
-          this.displayedAnswer += this.answer[index];
+        if (index < text.length) {
+          if (section == "answer") {
+            this.displayedAnswer += text[index];
+          }
+          else if (section == "generated query") {
+            this.displayedGeneratedQuery += text[index];
+          }
           index++;
         }
         else {
@@ -134,11 +179,13 @@ export class QuestionComponent {
   resetState() {
     this.answer = '';
     this.displayedAnswer = '';
-    this.showAnswer = true;
+    this.showAnswer = false;
     this.isLoading = false;
     this.resources = [];
     this.showResources = false;
     this.inputDisabled = true;
+    this.showGeneratedQuery = false;
+    this.displayedGeneratedQuery = '';
   }
 
   handleKeyDown(event: KeyboardEvent) {
