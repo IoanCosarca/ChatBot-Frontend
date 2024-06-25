@@ -89,14 +89,14 @@ export class QuestionComponent {
         this.showAnswer = true;
         this.questionService.askQuestionV1(this.question).subscribe(
           (answer: AnswerModel) => this.handleResponse(answer),
-          () => this.handleError()
+          () => this.handleError("")
         );
       }
       else if (this.selectedVersion === 'version2') {
         this.showAnswer = true;
         this.questionService.askQuestionV2(this.question).subscribe(
           (answer: AnswerModel) => this.handleResponse(answer),
-          () => this.handleError()
+          () => this.handleError("")
         );
       }
       else if (this.selectedVersion === 'version3') {
@@ -105,7 +105,11 @@ export class QuestionComponent {
           (answer: AnswerModel) => {
             this.displayGeneratedQuery(answer.query_response);
           },
-          () => this.handleError()
+          () => {
+            this.showGeneratedQuery = false;
+            this.showAnswer = true;
+            this.handleError("")
+          }
         );
       }
     }
@@ -115,14 +119,20 @@ export class QuestionComponent {
     this.answer = answer.query_response;
     this.isLoading = false;
     this.typeAnswer(this.answer, "answer").then(() => {
-      this.fetchResources();
+      if (answer.status == 200) {
+        this.fetchResources();
+      }
     });
   }
 
-  handleError() {
+  handleError(error_message: string) {
     this.isLoading = false;
-    this.answer = 'An error occurred while fetching the answer.';
-    this.displayedAnswer = this.answer;
+    if (error_message == "") {
+      this.answer = 'An error occurred while fetching the answer. Try sending your request again.';
+    }
+    else {
+      this.answer = error_message;
+    }
     this.typeAnswer(this.answer, "answer").then(() => {
       this.enableInput();
     });
@@ -142,15 +152,15 @@ export class QuestionComponent {
     this.question_n_sparql.query = this.question.query;
     this.questionService.askBasedOnGenerated(this.question_n_sparql).subscribe(
       (response: any) => {
-        if (response.status === 200) {
-          this.handleResponse(response.body);
+        if (JSON.parse(response.status) == 200) {
+          this.handleResponse(response);
         }
-        else {
-          this.handleError();
+        else if (JSON.parse(response.status) == 500) {
+          this.handleError(response.query_response);
         }
       },
       () => {
-        this.handleError()
+        this.handleError("")
       }
     );
   }
