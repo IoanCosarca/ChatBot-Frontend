@@ -9,10 +9,10 @@
                   [disabled]="inputDisabled"></textarea>
       </mat-form-field>
       <div class="button-toggle-container">
-        <mat-button-toggle-group #buttonToggleGroup="matButtonToggleGroup" [(ngModel)]="selectedVersion">
-          <mat-button-toggle value="version1">Version 1</mat-button-toggle>
-          <mat-button-toggle value="version2">Version 2</mat-button-toggle>
-          <mat-button-toggle value="version3">Version 3</mat-button-toggle>
+        <mat-button-toggle-group [(ngModel)]="selectedVersion">
+          <mat-button-toggle value="version1">Focused Search & Jeopardy</mat-button-toggle>
+          <mat-button-toggle value="version2">Broad Search</mat-button-toggle>
+          <mat-button-toggle value="version3">Sparql generation & Search</mat-button-toggle>
         </mat-button-toggle-group>
       </div>
       <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
