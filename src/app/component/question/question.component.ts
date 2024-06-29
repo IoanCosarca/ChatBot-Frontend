@@ -1,17 +1,18 @@
-import { animate, query, stagger, style, transition, trigger } from "@angular/animations";
-import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { FormsModule } from "@angular/forms";
-import { MatButton } from "@angular/material/button";
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCard, MatCardContent, MatCardTitle } from "@angular/material/card";
-import { MatFormField, MatInput, MatLabel }  from "@angular/material/input";
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {animate, query, stagger, style, transition, trigger} from "@angular/animations";
+import {CommonModule} from '@angular/common';
+import {Component, ElementRef, ViewChild} from '@angular/core';
+import {FormsModule} from "@angular/forms";
+import {MatButton} from "@angular/material/button";
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
+import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
-import { AnswerModel } from "../../model/answer.model";
-import { QuestionModel } from "../../model/question.model";
-import { SparqlGeneratedModel } from "../../model/sparql-generated.model";
-import { QuestionService } from "../../service/question.service";
+import {AnswerModel} from "../../model/answer.model";
+import {ImageModel} from "../../model/image.model";
+import {QuestionModel} from "../../model/question.model";
+import {SparqlGeneratedModel} from "../../model/sparql-generated.model";
+import {QuestionService} from "../../service/question.service";
 
 @Component({
   selector: 'app-question',
@@ -71,6 +72,7 @@ export class QuestionComponent {
   };
   showGeneratedQuery = false;
   displayedGeneratedQuery = '';
+  displayedImageUrl: string | null = null;
 
   constructor(private questionService: QuestionService) { }
 
@@ -88,14 +90,20 @@ export class QuestionComponent {
       if (this.selectedVersion === 'version1') {
         this.showAnswer = true;
         this.questionService.askQuestionV1(this.question).subscribe(
-          (answer: AnswerModel) => this.handleResponse(answer),
+          (answer: AnswerModel) => {
+            this.fetchImage(answer.query_response);
+            this.handleResponse(answer);
+          },
           () => this.handleError("")
         );
       }
       else if (this.selectedVersion === 'version2') {
         this.showAnswer = true;
         this.questionService.askQuestionV2(this.question).subscribe(
-          (answer: AnswerModel) => this.handleResponse(answer),
+          (answer: AnswerModel) => {
+            this.fetchImage(answer.query_response);
+            this.handleResponse(answer)
+          },
           () => this.handleError("")
         );
       }
@@ -115,6 +123,19 @@ export class QuestionComponent {
     }
   }
 
+  private fetchImage(query_response: string) {
+    this.questionService.getImage(query_response).subscribe(
+      (image: ImageModel) => {
+        this.displayedImageUrl = this.createImageUrl(image.image);
+      },
+      () => console.log("No image found")
+    );
+  }
+
+  private createImageUrl(base64String: Blob): string {
+    return `data:image/*;base64,${base64String}`;
+  }
+
   handleResponse(answer: AnswerModel) {
     this.answer = answer.query_response;
     this.isLoading = false;
@@ -122,6 +143,7 @@ export class QuestionComponent {
       if (answer.status == 200) {
         this.fetchResources();
       }
+      this.enableInput();
     });
   }
 
@@ -153,6 +175,7 @@ export class QuestionComponent {
     this.questionService.askBasedOnGenerated(this.question_n_sparql).subscribe(
       (response: any) => {
         if (JSON.parse(response.status) == 200) {
+          this.fetchImage(response.query_response);
           this.handleResponse(response);
         }
         else if (JSON.parse(response.status) == 500) {
@@ -196,6 +219,7 @@ export class QuestionComponent {
     this.inputDisabled = true;
     this.showGeneratedQuery = false;
     this.displayedGeneratedQuery = '';
+    this.displayedImageUrl = null;
   }
 
   handleKeyDown(event: KeyboardEvent) {
