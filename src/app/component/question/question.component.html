@@ -10,23 +10,26 @@
       </mat-form-field>
       <div class="button-toggle-container">
         <mat-button-toggle-group [(ngModel)]="selectedVersion">
-          <mat-button-toggle value="version1">Focused Search & Jeopardy</mat-button-toggle>
-          <mat-button-toggle value="version2">Broad Search</mat-button-toggle>
-          <mat-button-toggle value="version3">Sparql generation & Search</mat-button-toggle>
+          <mat-button-toggle value="version1" [disabled]="inputDisabled">Focused Search & Jeopardy</mat-button-toggle>
+          <mat-button-toggle value="version2" [disabled]="inputDisabled">Broad Search</mat-button-toggle>
+          <mat-button-toggle value="version3" [disabled]="inputDisabled">Sparql generation & Search</mat-button-toggle>
         </mat-button-toggle-group>
       </div>
       <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
     </mat-card-content>
     <mat-card-content *ngIf="showGeneratedQuery">
       <h3>Generated SPARQL Query:</h3>
-      <p>{{ displayedGeneratedQuery }}</p>
+      <p class="answer-text">{{ displayedGeneratedQuery }}</p>
     </mat-card-content>
     <mat-card-content *ngIf="showAnswer">
       <h3>Answer:</h3>
       <div *ngIf="isLoading" class="spinner-container">
         <mat-spinner></mat-spinner>
       </div>
-      <p *ngIf="!isLoading">{{ displayedAnswer }}</p>
+      <div class="answer-content">
+        <p *ngIf="!isLoading" class="answer-text">{{ displayedAnswer }}</p>
+        <img *ngIf="displayedImageUrl" class="answer-image" [src]="displayedImageUrl" alt=""/>
+      </div>
     </mat-card-content>
     <mat-card-content *ngIf="showResources">
       <h3>Resources:</h3>

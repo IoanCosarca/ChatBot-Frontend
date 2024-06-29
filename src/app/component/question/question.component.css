@@ -8,8 +8,8 @@
 }
 
 .chatbot-card {
-  width: 750px;
-  padding: 20px 20px 40px 20px;
+  width: 1000px;
+  padding: 40px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background-color: #000;
 }
@@ -41,11 +41,13 @@ textarea {
 .button-toggle-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .mat-button-toggle {
   color: #fff;
+  font-size: 16px;
+  padding: 5px;
 }
 
 .mat-button-toggle-checked {
@@ -74,6 +76,27 @@ mat-card-content p {
   height: 50px;
   margin: 25px;
   padding: 25px;
+}
+
+.answer-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.answer-content p {
+  flex: 1;
+}
+
+.answer-text {
+  font-size: 18px;
+}
+
+.answer-image {
+  max-width: 300px;
+  margin-left: 40px;
+  object-fit: contain;
+  float: right;
 }
 
 .resource-card {
