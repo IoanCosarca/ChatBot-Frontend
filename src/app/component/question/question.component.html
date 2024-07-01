@@ -2,12 +2,22 @@
   <mat-card class="chatbot-card">
     <mat-card-title>DBpedia Assistant</mat-card-title>
     <mat-card-content class="query">
-      <mat-form-field class="full-width" appearance="outline">
-        <mat-label>Ask your question</mat-label>
-        <textarea matInput #textarea [(ngModel)]="question.query" placeholder="Type your question here"
-                  (keydown)="handleKeyDown($event)" (input)="adjustTextareaHeight()"
-                  [disabled]="inputDisabled"></textarea>
-      </mat-form-field>
+      <div class="input-container">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Ask your question</mat-label>
+          <textarea matInput #textarea [(ngModel)]="question.query" placeholder="Type your question here"
+                    (keydown)="handleKeyDown($event)" (input)="adjustTextareaHeight()"
+                    [disabled]="inputDisabled"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="model-select">
+          <mat-label>Select Model</mat-label>
+          <mat-select [(ngModel)]="selectedModel" [disabled]="inputDisabled">
+            <mat-option value="gemini">Gemini (gemini-1.0-pro-002)</mat-option>
+            <mat-option value="chat-bison">Chat Bison (chat-bison-32k&#64;002)</mat-option>
+            <mat-option value="text-bison">Text Bison (text-bison&#64;001)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
       <div class="button-toggle-container">
         <mat-button-toggle-group [(ngModel)]="selectedVersion">
           <mat-button-toggle value="version1" [disabled]="inputDisabled">Focused Search & Jeopardy</mat-button-toggle>
@@ -15,7 +25,18 @@
           <mat-button-toggle value="version3" [disabled]="inputDisabled">Sparql generation & Search</mat-button-toggle>
         </mat-button-toggle-group>
       </div>
-      <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
+      <div class="generation-container">
+        <mat-form-field appearance="outline" class="generation-type" *ngIf="selectedVersion=='version3'">
+          <mat-label>Select Generation Type</mat-label>
+          <mat-select [(ngModel)]="selectedGeneration" [disabled]="inputDisabled">
+            <mat-option value="with-examples">With Examples</mat-option>
+            <mat-option value="without-examples">Without Examples</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="submit-button-container">
+        <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
+      </div>
     </mat-card-content>
     <mat-card-content *ngIf="showGeneratedQuery">
       <h3>Generated SPARQL Query:</h3>
