@@ -1,18 +1,20 @@
-import {animate, query, stagger, style, transition, trigger} from "@angular/animations";
-import {CommonModule} from '@angular/common';
-import {Component, ElementRef, ViewChild} from '@angular/core';
-import {FormsModule} from "@angular/forms";
-import {MatButton} from "@angular/material/button";
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatCard, MatCardContent, MatCardTitle} from "@angular/material/card";
-import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { animate, query, stagger, style, transition, trigger } from "@angular/animations";
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormsModule } from "@angular/forms";
+import { MatButton } from "@angular/material/button";
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCard, MatCardContent, MatCardTitle } from "@angular/material/card";
+import { MatFormField, MatInput, MatLabel } from "@angular/material/input";
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
-import {AnswerModel} from "../../model/answer.model";
-import {ImageModel} from "../../model/image.model";
-import {QuestionModel} from "../../model/question.model";
-import {SparqlGeneratedModel} from "../../model/sparql-generated.model";
-import {QuestionService} from "../../service/question.service";
+import { AnswerModel } from "../../model/answer.model";
+import { ImageModel } from "../../model/image.model";
+import { QueryModel } from "../../model/query.model";
+import { SparqlGeneratedModel } from "../../model/sparql-generated.model";
+import { QuestionService } from "../../service/question.service";
+import {ForGenerationModel} from "../../model/for-generation.model";
 
 @Component({
   selector: 'app-question',
@@ -29,6 +31,7 @@ import {QuestionService} from "../../service/question.service";
     MatInput,
     MatLabel,
     MatProgressSpinnerModule,
+    MatSelectModule
   ],
   templateUrl: './question.component.html',
   styleUrl: './question.component.css',
@@ -54,8 +57,9 @@ import {QuestionService} from "../../service/question.service";
   ]
 })
 export class QuestionComponent {
-  question: QuestionModel = {
-    query: ""
+  question: QueryModel = {
+    query: "",
+    model: ""
   };
   answer = '';
   displayedAnswer = '';
@@ -65,7 +69,9 @@ export class QuestionComponent {
   showResources = false;
   inputDisabled = false;
   @ViewChild('textarea') textarea!: ElementRef;
+  selectedModel = 'gemini';
   selectedVersion = 'version1';
+  selectedGeneration = "with-examples";
   question_n_sparql: SparqlGeneratedModel = {
     generated_sparql: "",
     query: ""
@@ -85,6 +91,7 @@ export class QuestionComponent {
   getAnswer() {
     if (this.question.query !== '') {
       this.resetState();
+      this.question.model = this.selectedModel;
       this.isLoading = true;
 
       if (this.selectedVersion === 'version1') {
@@ -109,7 +116,12 @@ export class QuestionComponent {
       }
       else if (this.selectedVersion === 'version3') {
         this.showGeneratedQuery = true;
-        this.questionService.generateQuery(this.question).subscribe(
+        let request: ForGenerationModel = {
+          query: this.question.query,
+          model: this.selectedModel,
+          type: this.selectedGeneration
+        }
+        this.questionService.generateQuery(request).subscribe(
           (answer: AnswerModel) => {
             this.displayGeneratedQuery(answer.query_response);
           },
@@ -124,7 +136,11 @@ export class QuestionComponent {
   }
 
   private fetchImage(query_response: string) {
-    this.questionService.getImage(query_response).subscribe(
+    let request: QueryModel = {
+      query: query_response,
+      model: this.selectedModel
+    }
+    this.questionService.getImage(request).subscribe(
       (image: ImageModel) => {
         this.displayedImageUrl = this.createImageUrl(image.image);
       },
@@ -205,7 +221,7 @@ export class QuestionComponent {
           clearInterval(interval);
           resolve();
         }
-      }, 15);
+      }, 10);
     });
   }
 
