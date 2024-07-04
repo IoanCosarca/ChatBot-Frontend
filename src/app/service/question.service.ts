@@ -28,6 +28,10 @@ export class QuestionService {
     });
   }
 
+  public getConsideredImages(): Observable<ImageModel[]> {
+    return this.httpClient.get<ImageModel[]>(`http://127.0.0.1:8080/ai/considered_images`);
+  }
+
   public askQuestionV1(request: QueryModel): Observable<AnswerModel> {
     return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v1`, request);
   }

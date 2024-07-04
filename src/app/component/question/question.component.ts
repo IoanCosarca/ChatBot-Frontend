@@ -78,7 +78,10 @@ export class QuestionComponent {
   };
   showGeneratedQuery = false;
   displayedGeneratedQuery = '';
+  imageDistance: number = 0.0;
   displayedImageUrl: string | null = null;
+  consideredImages: ImageModel[] = []
+  showImages: boolean = false;
 
   constructor(private questionService: QuestionService) { }
 
@@ -139,16 +142,28 @@ export class QuestionComponent {
     let request: QueryModel = {
       query: query_response,
       model: this.selectedModel
-    }
+    };
     this.questionService.getImage(request).subscribe(
       (image: ImageModel) => {
         this.displayedImageUrl = this.createImageUrl(image.image);
+        this.imageDistance = image.distance;
+        this.fetchConsideredImages();
       },
       () => console.log("No image found")
     );
   }
 
-  private createImageUrl(base64String: Blob): string {
+  fetchConsideredImages() {
+    this.questionService.getConsideredImages().subscribe(
+      (images: ImageModel[]) => {
+        this.consideredImages = images;
+        this.showImages = true;
+      },
+      () => console.log("Error fetching considered images")
+    );
+  }
+
+  public createImageUrl(base64String: Blob): string {
     return `data:image/*;base64,${base64String}`;
   }
 
@@ -236,6 +251,8 @@ export class QuestionComponent {
     this.showGeneratedQuery = false;
     this.displayedGeneratedQuery = '';
     this.displayedImageUrl = null;
+    this.showImages = false;
+    this.consideredImages = [];
   }
 
   handleKeyDown(event: KeyboardEvent) {
