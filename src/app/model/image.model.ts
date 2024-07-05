@@ -1,3 +1,4 @@
 export interface ImageModel {
-  image: Blob
+  image: Blob,
+  distance: number
 }

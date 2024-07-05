@@ -38,9 +38,17 @@
         <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
       </div>
     </mat-card-content>
+    <mat-card-content>
+      <p>Jeopardy Questions: {{ jeopardyQuestionCount }}</p>
+      <p>DBpedia Articles: {{ articleCount }}</p>
+    </mat-card-content>
     <mat-card-content *ngIf="showGeneratedQuery">
       <h3>Generated SPARQL Query:</h3>
       <p class="answer-text">{{ displayedGeneratedQuery }}</p>
+    </mat-card-content>
+    <mat-card-content *ngIf="showAnswer">
+      <h3>Search stage:</h3>
+      <p class="answer-text">{{ searchStage }}</p>
     </mat-card-content>
     <mat-card-content *ngIf="showAnswer">
       <h3>Answer:</h3>
@@ -49,7 +57,19 @@
       </div>
       <div class="answer-content">
         <p *ngIf="!isLoading" class="answer-text">{{ displayedAnswer }}</p>
-        <img *ngIf="displayedImageUrl" class="answer-image" [src]="displayedImageUrl" alt=""/>
+        <div *ngIf="displayedImageUrl" class="image-container">
+          <img class="answer-image" [src]="displayedImageUrl" alt=""/>
+          <p class="image-distance">{{ imageDistance }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-content *ngIf="showImages">
+      <h3>Considered Images:</h3>
+      <div @listStagger class="considered-images-container">
+        <div *ngFor="let image of consideredImages; let i = index" class="considered-image" [style.animation-delay.ms]="i * 100">
+          <img [src]="createImageUrl(image.image)" alt=""/>
+          <p class="image-distance">{{ image.distance }}</p>
+        </div>
       </div>
     </mat-card-content>
     <mat-card-content *ngIf="showResources">
