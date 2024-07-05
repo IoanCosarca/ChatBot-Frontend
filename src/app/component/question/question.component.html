@@ -38,9 +38,17 @@
         <button mat-raised-button class="submit-button" color="primary" (click)="getAnswer()" [disabled]="inputDisabled">Submit</button>
       </div>
     </mat-card-content>
+    <mat-card-content>
+      <p>Jeopardy Questions: {{ jeopardyQuestionCount }}</p>
+      <p>DBpedia Articles: {{ articleCount }}</p>
+    </mat-card-content>
     <mat-card-content *ngIf="showGeneratedQuery">
       <h3>Generated SPARQL Query:</h3>
       <p class="answer-text">{{ displayedGeneratedQuery }}</p>
+    </mat-card-content>
+    <mat-card-content *ngIf="showAnswer">
+      <h3>Search stage:</h3>
+      <p class="answer-text">{{ searchStage }}</p>
     </mat-card-content>
     <mat-card-content *ngIf="showAnswer">
       <h3>Answer:</h3>

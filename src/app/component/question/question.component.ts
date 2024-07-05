@@ -1,6 +1,6 @@
 import { animate, query, stagger, style, transition, trigger } from "@angular/animations";
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from "@angular/forms";
 import { MatButton } from "@angular/material/button";
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -10,11 +10,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
 import { AnswerModel } from "../../model/answer.model";
+import { ForGenerationModel } from "../../model/for-generation.model";
 import { ImageModel } from "../../model/image.model";
 import { QueryModel } from "../../model/query.model";
 import { SparqlGeneratedModel } from "../../model/sparql-generated.model";
 import { QuestionService } from "../../service/question.service";
-import {ForGenerationModel} from "../../model/for-generation.model";
+import { SocketService } from "../../service/socket.service";
 
 @Component({
   selector: 'app-question',
@@ -56,34 +57,50 @@ import {ForGenerationModel} from "../../model/for-generation.model";
     ])
   ]
 })
-export class QuestionComponent {
+export class QuestionComponent implements OnInit {
+  jeopardyQuestionCount: number = 0;
+  articleCount: number = 0;
   question: QueryModel = {
     query: "",
     model: ""
   };
-  answer = '';
-  displayedAnswer = '';
-  showAnswer = false;
-  isLoading = false;
+  answer: string = '';
+  displayedAnswer: string = '';
+  searchStage: string = '';
+  showAnswer: boolean = false;
+  isLoading: boolean = false;
   resources: string[] = [];
-  showResources = false;
-  inputDisabled = false;
+  showResources: boolean = false;
+  inputDisabled: boolean = false;
   @ViewChild('textarea') textarea!: ElementRef;
-  selectedModel = 'gemini';
-  selectedVersion = 'version1';
-  selectedGeneration = "with-examples";
+  selectedModel: string = 'gemini';
+  selectedVersion: string = 'version1';
+  selectedGeneration: string = "with-examples";
   question_n_sparql: SparqlGeneratedModel = {
     generated_sparql: "",
     query: ""
   };
-  showGeneratedQuery = false;
-  displayedGeneratedQuery = '';
+  showGeneratedQuery: boolean = false;
+  displayedGeneratedQuery: string = '';
   imageDistance: number = 0.0;
   displayedImageUrl: string | null = null;
   consideredImages: ImageModel[] = []
   showImages: boolean = false;
 
-  constructor(private questionService: QuestionService) { }
+  constructor(private questionService: QuestionService, private socketService: SocketService) { }
+
+  ngOnInit(): void {
+    this.socketService.requestInitialData((data) => {
+      this.jeopardyQuestionCount = data.total_jeopardy_questions;
+      this.articleCount = data.total_articles;
+    });
+    this.socketService.requestArticleCount((data) => {
+      this.articleCount = data.articleCount;
+    });
+    this.socketService.requestSearchStage((data) => {
+      this.searchStage = data.searchStage;
+    });
+  }
 
   adjustTextareaHeight() {
     const textarea = this.textarea.nativeElement;
@@ -236,13 +253,14 @@ export class QuestionComponent {
           clearInterval(interval);
           resolve();
         }
-      }, 10);
+      }, 5);
     });
   }
 
   resetState() {
     this.answer = '';
     this.displayedAnswer = '';
+    this.searchStage = '';
     this.showAnswer = false;
     this.isLoading = false;
     this.resources = [];
