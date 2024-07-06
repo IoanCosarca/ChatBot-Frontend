@@ -13,6 +13,7 @@ import { AnswerModel } from "../../model/answer.model";
 import { ForGenerationModel } from "../../model/for-generation.model";
 import { ImageModel } from "../../model/image.model";
 import { QueryModel } from "../../model/query.model";
+import { SearchImageModel } from "../../model/search-image.model";
 import { SparqlGeneratedModel } from "../../model/sparql-generated.model";
 import { QuestionService } from "../../service/question.service";
 import { SocketService } from "../../service/socket.service";
@@ -74,6 +75,8 @@ export class QuestionComponent implements OnInit {
   inputDisabled: boolean = false;
   @ViewChild('textarea') textarea!: ElementRef;
   selectedModel: string = 'gemini';
+  @ViewChild('fileInput') fileInput!: ElementRef;
+  imageUrl: string | ArrayBuffer | null = null;
   selectedVersion: string = 'version1';
   selectedGeneration: string = "with-examples";
   question_n_sparql: SparqlGeneratedModel = {
@@ -106,6 +109,28 @@ export class QuestionComponent implements OnInit {
     const textarea = this.textarea.nativeElement;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    this.processFile(file);
+  }
+
+  processFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imageUrl = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  handleChange() {
+    if (this.selectedVersion === 'version4') {
+      this.question.query = "What is in the image?";
+    }
+    else {
+      this.imageUrl = null;
+    }
   }
 
   getAnswer() {
@@ -152,6 +177,28 @@ export class QuestionComponent implements OnInit {
           }
         );
       }
+      else if (this.selectedVersion === 'version4') {
+        this.showAnswer = true;
+        if (this.imageUrl) {
+          const base64Image = this.imageUrl.toString().split(',')[1];
+          let imageRequest: SearchImageModel = {
+            image: base64Image,
+            query: this.question.query,
+            model: this.selectedModel
+          };
+
+          this.questionService.askBasedOnImage(imageRequest).subscribe(
+            (answer: AnswerModel) => {
+              this.handleResponse(answer);
+              this.fetchConsideredImages();
+            },
+            () => this.handleError("")
+          );
+        }
+        else {
+          this.handleError("No image selected.");
+        }
+      }
     }
   }
 
@@ -188,7 +235,7 @@ export class QuestionComponent implements OnInit {
     this.answer = answer.query_response;
     this.isLoading = false;
     this.typeAnswer(this.answer, "answer").then(() => {
-      if (answer.status == 200) {
+      if (answer.status == 200 && this.selectedVersion != "version4") {
         this.fetchResources();
       }
       this.enableInput();

@@ -5,6 +5,7 @@ import { AnswerModel } from "../model/answer.model";
 import { ForGenerationModel } from "../model/for-generation.model";
 import { ImageModel } from "../model/image.model";
 import { QueryModel } from "../model/query.model";
+import { SearchImageModel } from "../model/search-image.model";
 import { SparqlGeneratedModel } from "../model/sparql-generated.model";
 
 import { Observable } from "rxjs";
@@ -46,5 +47,9 @@ export class QuestionService {
 
   public askBasedOnGenerated(question_n_sparql: SparqlGeneratedModel): Observable<AnswerModel> {
     return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v3/dbpedia`, question_n_sparql);
+  }
+
+  public askBasedOnImage(image: SearchImageModel): Observable<AnswerModel> {
+    return this.httpClient.post<AnswerModel>(`http://127.0.0.1:8080/ai/v4`, image);
   }
 }
